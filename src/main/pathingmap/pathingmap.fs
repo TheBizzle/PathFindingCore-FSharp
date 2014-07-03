@@ -20,8 +20,7 @@ open org.bizzle.pathfinding.coordinate
       let filterFunc (x: direction) =
         let coord           = pathingMap.findNeighborCoord (loc, x)
         let neighborTerrain = this.getTerrain coord
-        let f: (terrain -> bool) = Terrain.isPassable
-        f neighborTerrain
+        Terrain.isPassable neighborTerrain
       Seq.filter filterFunc direction.toSeq
 
     member this.step = function
@@ -35,10 +34,10 @@ open org.bizzle.pathfinding.coordinate
       | BadCoord    -> failwith "Cannot mark invalid coordinate as goal"
 
     override this.ToString() =
-      let xMax      = this.grid.GetLength(0) - 1
-      let f x _ t   = (string (Terrain.terrainToChar t)) + (if x = xMax then "\n" else "")
-      let strings2D = Array2D.mapi (f) this.grid
-      let strings1D = strings2D |> Seq.cast<string>
+      let xMax                = this.grid.GetLength(0) - 1
+      let terrainsToStr x _ t = (string (Terrain.terrainToChar t)) + (if x = xMax then "\n" else "")
+      let strings2D           = Array2D.mapi terrainsToStr this.grid
+      let strings1D           = strings2D |> Seq.cast<string>
       Seq.fold (fun acc x -> acc + x) "" strings1D
 
     member this.clone () =
@@ -57,7 +56,7 @@ open org.bizzle.pathfinding.coordinate
 
     static member findNeighborCoord = function
       | (Coord(x, y), dir) ->
-        match dir with
+          match dir with
           | North -> Coord(x,     y + 1)
           | South -> Coord(x,     y - 1)
           | East  -> Coord(x + 1, y)
@@ -71,6 +70,6 @@ open org.bizzle.pathfinding.coordinate
           elif x2 = x1 + 1 then East
           elif x2 = x1 - 1 then West
           else
-            let errorMessage = sprintf "%s or %s is/are invalid" (string startCoord) (string endCoord)
+            let errorMessage = sprintf "%O or %O is/are invalid" startCoord endCoord
             raise (System.ArgumentException(errorMessage))
       | _ -> failwith "Cannot calculate direction to/from invalid coordinate"
